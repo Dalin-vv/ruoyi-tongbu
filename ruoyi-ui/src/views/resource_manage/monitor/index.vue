@@ -264,67 +264,25 @@
 </template>
 
 <script>
+import { getK8sMonitorData } from '@/api/k8s/monitor'
+
 export default {
   name: 'K8sMonitor',
   data() {
     return {
       // 集群概览数据
       summary: {
-        nodes: 3,
-        pods: 24,
-        deployments: 8,
-        errors: 4
+        nodes: 0,
+        pods: 0,
+        deployments: 0,
+        errors: 0
       },
       
       // 节点数据
-      nodes: [
-        {
-          name: 'k8s-master-01',
-          status: 'Ready',
-          cpuUsed: 4.2,
-          cpuTotal: 8,
-          cpuPercent: 52.5,
-          memUsed: 12.8 * 1024,
-          memTotal: 32 * 1024,
-          memPercent: 40,
-          os: 'Ubuntu 20.04',
-          kubelet: 'v1.26.3'
-        },
-        {
-          name: 'k8s-worker-01',
-          status: 'Ready',
-          cpuUsed: 9.6,
-          cpuTotal: 16,
-          cpuPercent: 60,
-          memUsed: 28.2 * 1024,
-          memTotal: 64 * 1024,
-          memPercent: 44,
-          os: 'CentOS 7.9',
-          kubelet: 'v1.26.3'
-        },
-        {
-          name: 'k8s-worker-02',
-          status: 'NotReady',
-          cpuUsed: 0,
-          cpuTotal: 16,
-          cpuPercent: 0,
-          memUsed: 0,
-          memTotal: 64 * 1024,
-          memPercent: 0,
-          os: 'CentOS 7.9',
-          kubelet: 'v1.26.3'
-        }
-      ],
+      nodes: [],
       
       // Pod数据
-      pods: [
-        { name: 'nginx-7b874857bd-5jq8k', namespace: 'default', status: 'Running', node: 'k8s-worker-01', restarts: 0, age: '2d' },
-        { name: 'redis-5f554bd8f4-8n2kz', namespace: 'database', status: 'Running', node: 'k8s-worker-01', restarts: 1, age: '5d' },
-        { name: 'mysql-7c6c5d9f88-p2xw8', namespace: 'database', status: 'Running', node: 'k8s-worker-01', restarts: 0, age: '3d' },
-        { name: 'webapp-85f8f8dc8c-7vxq9', namespace: 'production', status: 'Pending', node: '', restarts: 0, age: '10m' },
-        { name: 'monitoring-5f7d8f8d7c-2k9w3', namespace: 'monitoring', status: 'Failed', node: 'k8s-master-01', restarts: 3, age: '1d' },
-        { name: 'logging-6d5f8d7f8c-9x2w4', namespace: 'monitoring', status: 'Running', node: 'k8s-master-01', restarts: 0, age: '1d' }
-      ],
+      pods: [],
       
       // 过滤条件
       podFilter: '',
@@ -342,13 +300,42 @@ export default {
       );
     }
   },
+  mounted() {
+    this.loadData();
+  },
   methods: {
+    // 加载数据
+    async loadData() {
+      this.loading = true;
+      try {
+        const response = await getK8sMonitorData();
+        const data = response.data;
+        
+        // 更新概览数据
+        this.summary = data.summary || {
+          nodes: 0,
+          pods: 0,
+          deployments: 0,
+          errors: 0
+        };
+        
+        // 更新节点数据
+        this.nodes = data.nodes || [];
+        
+        // 更新Pod数据
+        this.pods = data.pods || [];
+        
+      } catch (error) {
+        console.error('获取监控数据失败:', error);
+        this.$message.error('获取监控数据失败');
+      } finally {
+        this.loading = false;
+      }
+    },
+    
     // 刷新数据
     refreshData() {
-      this.loading = true;
-      setTimeout(() => {
-        this.loading = false;
-      }, 800);
+      this.loadData();
     },
     
     // 根据使用率获取颜色
