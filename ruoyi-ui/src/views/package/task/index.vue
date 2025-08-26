@@ -3,7 +3,7 @@
     <el-card>
       <div class="flex justify-between items-center mb-4">
         <h2>封装任务管理</h2>
-        <el-button type="primary" @click="dialogVisible = true">新增任务</el-button>
+        <el-button type="primary" @click="handleAdd">新增任务</el-button>
       </div>
 
       <el-table :data="tasks" border style="width: 100%">
@@ -15,7 +15,7 @@
           <template #default="scope">
             <el-button size="small" @click="handleExecute(scope.row)">执行</el-button>
             <el-button size="small" @click="handleLog(scope.row)">日志</el-button>
-            <el-button size="small" type="danger">删除</el-button>
+            <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -28,20 +28,20 @@
       </el-scrollbar>
     </el-drawer>
 
-    <!-- 新增任务 Dialog -->
-    <el-dialog v-model="dialogVisible" title="新增任务" width="500px">
-      <el-form label-width="100px">
-        <el-form-item label="任务名称">
+    <!-- 新增/编辑任务 Dialog -->
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
+      <el-form label-width="100px" ref="formRef" :model="form" :rules="rules">
+        <el-form-item label="任务名称" prop="name">
           <el-input v-model="form.name" />
         </el-form-item>
-        <el-form-item label="执行方式">
+        <el-form-item label="执行方式" prop="type">
           <el-radio-group v-model="form.type">
             <el-radio label="手动">手动</el-radio>
             <el-radio label="定时">定时</el-radio>
             <el-radio label="事件">事件</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="form.type==='定时'" label="Cron 表达式">
+        <el-form-item v-if="form.type==='定时'" label="Cron 表达式" prop="cron">
           <el-input v-model="form.cron" placeholder="0 0 * * * ?" />
         </el-form-item>
       </el-form>
@@ -54,20 +54,60 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { listTasks, addTask, updateTask, delTask, executeTask } from "@/api/package/task";
 
-const tasks = ref([
-  { id: 1, name: "NLP流水线执行", type: "手动", status: "已完成" },
-  { id: 2, name: "CV流水线定时任务", type: "定时", status: "运行中" },
-]);
+const tasks = ref([]);
 
 const drawerVisible = ref(false);
 const logs = ref([]);
 const dialogVisible = ref(false);
-const form = ref({ name: "", type: "手动", cron: "" });
+const dialogTitle = ref("");
+const form = ref({ id: undefined, name: "", type: "手动", cron: "" });
 
+const rules = {
+  name: [{ required: true, message: "任务名称不能为空", trigger: "blur" }],
+  type: [{ required: true, message: "执行方式不能为空", trigger: "blur" }],
+  cron: [{ required: true, message: "Cron表达式不能为空", trigger: "blur" }]
+};
+
+const formRef = ref(null);
+
+// 获取任务列表
+const getTaskList = () => {
+  listTasks().then(response => {
+    tasks.value = response.rows;
+  });
+};
+
+// 新增按钮操作
+const handleAdd = () => {
+  form.value = { id: undefined, name: "", type: "手动", cron: "" };
+  dialogTitle.value = "添加任务";
+  dialogVisible.value = true;
+};
+
+// 修改按钮操作
+const handleUpdate = (row) => {
+  form.value = { ...row };
+  dialogTitle.value = "修改任务";
+  dialogVisible.value = true;
+};
+
+// 删除按钮操作
+const handleDelete = (row) => {
+  const taskId = row.id;
+  delTask(taskId).then(response => {
+    getTaskList();
+  });
+};
+
+// 执行按钮操作
 const handleExecute = (row) => {
-  row.status = "运行中";
+  const taskId = row.id;
+  executeTask(taskId).then(response => {
+    getTaskList();
+  });
 };
 
 const handleLog = (row) => {
@@ -81,12 +121,26 @@ const handleLog = (row) => {
 };
 
 const saveTask = () => {
-  tasks.value.push({
-    id: tasks.value.length + 1,
-    ...form.value,
-    status: "未运行",
+  formRef.value.validate(valid => {
+    if (valid) {
+      if (form.value.id !== undefined) {
+        // 修改
+        updateTask(form.value).then(response => {
+          getTaskList();
+          dialogVisible.value = false;
+        });
+      } else {
+        // 新增
+        addTask(form.value).then(response => {
+          getTaskList();
+          dialogVisible.value = false;
+        });
+      }
+    }
   });
-  dialogVisible.value = false;
-  form.value = { name: "", type: "手动", cron: "" };
 };
+
+onMounted(() => {
+  getTaskList();
+});
 </script>
