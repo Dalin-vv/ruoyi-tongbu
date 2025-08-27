@@ -120,6 +120,9 @@
                       <div class="bar-total"></div>
                     </div>
                     <div class="bar-value">{{ node.cpuUsed.toFixed(1) }}/{{ node.cpuTotal }} 核心</div>
+                    <div class="bar-value">
+                      <el-tag type="warning" size="small">{{ node.cpuPercent }}%</el-tag>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -145,9 +148,13 @@
                         class="bar-used" 
                         :style="{ width: `${node.memPercent}%`, background: getUsageColor(node.memPercent) }"
                       ></div>
+                      
                       <div class="bar-total"></div>
                     </div>
                     <div class="bar-value">{{ formatMemory(node.memUsed) }}/{{ formatMemory(node.memTotal) }}</div>
+                    <div class="bar-value">
+                      <el-tag type="warning" size="small">{{ node.memPercent }}%</el-tag>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -169,7 +176,7 @@
               </div>
             </template>
             <el-table :data="nodes" style="width: 100%" height="300">
-              <el-table-column prop="name" label="节点名称" width="180">
+              <el-table-column prop="name" label="节点名称" width="200">
                 <template #default="{ row }">
                   <div class="node-info">
                     <i class="el-icon-cpu"></i>
@@ -177,14 +184,35 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="状态" width="100">
+              <el-table-column label="状态" width="120">
                 <template #default="{ row }">
                   <el-tag :type="row.status === 'Ready' ? 'success' : 'danger'" size="small">
                     {{ row.status }}
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="CPU使用率">
+              <el-table-column label="os" width="150">
+                <template #default="{ row }">
+                  <el-tag :type="primary" size="small">
+                    {{ row.os }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column label="ip地址" width="150">
+                <template #default="{ row }">
+                  <el-tag type="info" size="small">
+                    {{ row.ip }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column label="kubelet" width="150">
+                <template #default="{ row }">
+                  <el-tag type="primary" size="small">
+                    {{ row.kubelet }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <!-- <el-table-column label="CPU使用率">
                 <template #default="{ row }">
                   <el-progress 
                     :percentage="row.cpuPercent" 
@@ -194,8 +222,8 @@
                   ></el-progress>
                   <span style="margin-left: 10px">{{ row.cpuPercent }}%</span>
                 </template>
-              </el-table-column>
-              <el-table-column label="内存使用率">
+              </el-table-column> -->
+              <!-- <el-table-column label="内存使用率">
                 <template #default="{ row }">
                   <el-progress 
                     :percentage="row.memPercent" 
@@ -205,7 +233,7 @@
                   ></el-progress>
                   <span style="margin-left: 10px">{{ row.memPercent }}%</span>
                 </template>
-              </el-table-column>
+              </el-table-column> -->
             </el-table>
           </el-card>
         </el-col>
@@ -249,7 +277,7 @@
               </el-table-column>
               <el-table-column label="重启次数" width="80" prop="restarts"></el-table-column>
               <el-table-column label="运行时间" width="100" prop="age"></el-table-column>
-              <el-table-column label="操作" width="120">
+              <el-table-column label="操作" width="140">
                 <template #default="{ row }">
                   <el-button type="text" size="small" @click="showPodDetails(row)">详情</el-button>
                   <el-button type="text" size="small" @click="showPodLogs(row)">日志</el-button>
@@ -558,7 +586,7 @@ export default {
 }
 
 .bar-value {
-  width: 180px;
+  width: 120px;
   text-align: right;
   font-size: 13px;
   color: #606266;

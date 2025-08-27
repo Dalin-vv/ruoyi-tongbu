@@ -47,6 +47,7 @@ public class K8sMonitorController
         node1.put("memTotal", 32 * 1024);
         node1.put("memPercent", 40);
         node1.put("os", "Ubuntu 20.04");
+        node1.put("ip", "192.168.152.152");
         node1.put("kubelet", "v1.26.3");
         nodes.add(node1);
         
@@ -60,6 +61,7 @@ public class K8sMonitorController
         node2.put("memTotal", 64 * 1024);
         node2.put("memPercent", 44);
         node2.put("os", "CentOS 7.9");
+        node2.put("ip", "192.168.152.118");
         node2.put("kubelet", "v1.26.3");
         nodes.add(node2);
         
@@ -73,6 +75,7 @@ public class K8sMonitorController
         node3.put("memTotal", 64 * 1024);
         node3.put("memPercent", 0);
         node3.put("os", "CentOS 7.9");
+        node3.put("ip", "192.168.152.114");
         node3.put("kubelet", "v1.26.3");
         nodes.add(node3);
         
