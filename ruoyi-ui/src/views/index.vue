@@ -4,7 +4,7 @@
     <div class="header-section">
       <div class="logo-title">
         <i class="el-icon-supervise main-icon"></i>
-        <h1>国产算力平台</h1>
+        <h1>国产算力资源管理平台</h1>
       </div>
     </div>
 
