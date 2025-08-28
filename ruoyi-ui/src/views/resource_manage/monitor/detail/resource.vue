@@ -219,5 +219,36 @@ export default {
 </script>
 
 <style>
+ .status-tables {
+  margin-bottom: 20px;
+}
 
+.table-card {
+  border-radius: 8px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: #303133;
+}
+.node-info, .pod-info {
+  display: flex;
+  align-items: center;
+}
+
+.node-info i, .pod-info i {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.node-info i {
+  color: #1890ff;
+}
+
+.pod-info i {
+  color: #52c41a;
+}
 </style>

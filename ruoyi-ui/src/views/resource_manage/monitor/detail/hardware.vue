@@ -395,23 +395,7 @@ export default {
   color: #303133;
 }
 
-.node-info, .pod-info {
-  display: flex;
-  align-items: center;
-}
 
-.node-info i, .pod-info i {
-  margin-right: 8px;
-  font-size: 16px;
-}
-
-.node-info i {
-  color: #1890ff;
-}
-
-.pod-info i {
-  color: #52c41a;
-}
 
 /* 网络统计样式 */
 .network-stats {
