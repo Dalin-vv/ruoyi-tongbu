@@ -207,13 +207,13 @@
                 
                 <!-- 加速卡详细信息表格 -->
                 <el-table :data="aiAccelerators" style="width: 100%; margin-top: 20px" size="small">
-                  <el-table-column prop="name" label="加速卡名称" width="150"></el-table-column>
+                  <el-table-column prop="name" label="加速卡名称" width="180"></el-table-column>
                   <el-table-column prop="type" label="类型" width="120">
                     <template #default="{ row }">
                       <el-tag size="small">{{ row.type }}</el-tag>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="memoryUsed" label="显存使用" width="120">
+                  <el-table-column prop="memoryUsed" label="显存使用" width="150">
                     <template #default="{ row }">
                       {{ formatMemory(row.memoryUsed) }}/{{ formatMemory(row.memoryTotal) }}
                     </template>

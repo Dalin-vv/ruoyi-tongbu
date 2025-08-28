@@ -1,11 +1,18 @@
 <template>
-  <div>
-    <el-container class="page-container">
-    <el-header>
-      <h1>算力主机管理</h1>
-    </el-header>
-
-    <el-main>
+  <div class="page-container">
+    <div>
+      <!-- <div>
+      <el-header>
+        <h1>算力主机管理</h1>
+      </el-header>
+    </div> -->
+      
+     <el-card>
+      <template #header>
+        <div class="card-header">
+          <span class="card-title">算力主机管理</span>
+        </div>
+      </template>
       <!-- 搜索和操作栏 -->
       <el-row :gutter="20" class="search-bar">
         <el-col :span="6">
@@ -105,8 +112,13 @@
         @update:current-page="currentPage = $event"
         @update:page-size="pageSize = $event"
       ></el-pagination>
-    </el-main>
-  </el-container>
+    </el-card>
+    </div>
+      
+    
+
+   
+
 
   <!-- 主机详情对话框 -->
   <el-dialog 
@@ -245,7 +257,7 @@
       <el-button type="primary" @click="saveHost">保存</el-button>
     </template>
   </el-dialog>
-  </div>
+</div>
 </template>
 
 <script>
@@ -452,7 +464,23 @@ export default {
 
 <style scoped>
 .page-container {
-  padding: 20px;
+  display: column;
+  padding: 25px;
+}
+.page-container .card-title {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+
+.monitor-header {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 .table-container {
   margin-top: 20px;
