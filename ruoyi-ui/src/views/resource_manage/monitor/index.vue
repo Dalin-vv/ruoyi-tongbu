@@ -150,67 +150,6 @@ export default {
       this.loadData();
     },
     
-    // 根据使用率获取颜色
-    // getUsageColor(percent) {
-    //   if (percent < 60) return '#67C23A';
-    //   if (percent < 80) return '#E6A23C';
-    //   return '#F56C6C';
-    // },
-    
-    // 获取Pod状态类型
-    // getPodStatusType(status) {
-    //   switch (status) {
-    //     case 'Running': return 'success';
-    //     case 'Pending': return 'warning';
-    //     case 'Succeeded': return '';
-    //     default: return 'danger';
-    //   }
-    // },
-    
-    // 格式化内存
-    // formatMemory(value) {
-    //   if (value > 1024 * 1024) {
-    //     return (value / (1024 * 1024)).toFixed(1) + ' TiB';
-    //   }
-    //   if (value > 1024) {
-    //     return (value / 1024).toFixed(1) + ' GiB';
-    //   }
-    //   return value.toFixed(1) + ' MiB';
-    // },
-    
-    // // 查看Pod详情
-    // showPodDetails(pod) {
-    //   console.log('查看Pod详情:', pod.name);
-    //   this.$message.info(`查看Pod详情: ${pod.name}`);
-    // },
-    
-    // // 查看Pod日志
-    // showPodLogs(pod) {
-    //   console.log('查看Pod日志:', pod.name);
-    //   this.$message.info(`查看Pod日志: ${pod.name}`);
-    // },
-    
-    // // 获取加速卡状态类型
-    // getAcceleratorStatusType(status) {
-    //   switch (status) {
-    //     case 'Online': return 'success';
-    //     case 'Offline': return 'danger';
-    //     case 'Busy': return 'warning';
-    //     case 'Idle': return 'info';
-    //     default: return '';
-    //   }
-    // },
-    
-    // // 格式化网络速度
-    // formatNetworkSpeed(speed) {
-    //   if (speed > 1024 * 1024) {
-    //     return (speed / (1024 * 1024)).toFixed(1) + ' Gbps';
-    //   }
-    //   if (speed > 1024) {
-    //     return (speed / 1024).toFixed(1) + ' Mbps';
-    //   }
-    //   return speed.toFixed(1) + ' Kbps';
-    // }
   }
 };
 </script>
