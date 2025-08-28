@@ -34,7 +34,7 @@
               </div>
             </template>
             
-            <el-table :data="filteredTenants" style="width: 100%">
+            <el-table v-loading="loading" :data="filteredTenants" style="width: 100%">
               <el-table-column type="selection" width="55"></el-table-column>
               <el-table-column prop="name" label="租户名称"></el-table-column>
               <el-table-column label="联系人">
@@ -310,9 +310,19 @@
 </template>
 
 <script>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
+import { 
+  listTenant, 
+  addTenant, 
+  updateTenant, 
+  delTenant, 
+  activateTenant as apiActivateTenant, 
+  suspendTenant as apiSuspendTenant, 
+  resumeTenant as apiResumeTenant, 
+  disableTenant as apiDisableTenant 
+} from '@/api/tenant/user'
 
 // 定义租户状态常量
 const TENANT_STATUS = {
@@ -334,67 +344,10 @@ export default {
     const showModal = ref(false)
     const showEditModal = ref(false)
     const searchQuery = ref('')
+    const loading = ref(false)
     
     // 租户数据
-    const tenants = ref([
-      {
-        id: 1,
-        name: 'tenant-production',
-        contact: '张三',
-        email: 'zhangsan@example.com',
-        createTime: '2023-05-10',
-        updateTime: '2023-05-10',
-        status: TENANT_STATUS.ACTIVE,
-        cpu: 16,
-        memory: 32,
-        description: '',
-        lifecycle: [
-          {
-            time: '2023-05-10 10:00:00',
-            type: 'primary',
-            content: '租户创建'
-          },
-          {
-            time: '2023-05-10 10:05:00',
-            type: 'success',
-            content: '租户激活'
-          }
-        ]
-      },
-      {
-        id: 2,
-        name: 'tenant-development',
-        contact: '李四',
-        email: 'lisi@example.com',
-        createTime: '2023-06-15',
-        status: TENANT_STATUS.ACTIVE,
-        cpu: 8,
-        memory: 16,
-        description: ''
-      },
-      {
-        id: 3,
-        name: 'tenant-testing',
-        contact: '王五',
-        email: 'wangwu@example.com',
-        createTime: '2023-07-22',
-        status: TENANT_STATUS.INACTIVE,
-        cpu: 4,
-        memory: 8,
-        description: ''
-      },
-      {
-        id: 4,
-        name: 'tenant-archive',
-        contact: '赵六',
-        email: 'zhaoliu@example.com',
-        createTime: '2023-02-14',
-        status: TENANT_STATUS.DISABLED,
-        cpu: 0,
-        memory: 0,
-        description: ''
-      }
-    ])
+    const tenants = ref([])
     
     // 新租户表单
     const newTenant = reactive({
@@ -465,35 +418,43 @@ export default {
       return [TENANT_STATUS.CREATED, TENANT_STATUS.DELETED].includes(status) ? 'plain' : 'light'
     }
     
-    const createTenant = () => {
-      const newId = Math.max(...tenants.value.map(t => t.id), 0) + 1
-      const currentDate = new Date().toISOString().split('T')[0]
-      
-      tenants.value.push({
-        id: newId,
-        name: newTenant.name,
-        contact: newTenant.contact,
-        email: newTenant.email,
-        createTime: currentDate,
-        status: newTenant.status,
-        cpu: newTenant.cpu,
-        memory: newTenant.memory,
-        description: newTenant.description
-      })
-      
-      // 重置表单
-      Object.assign(newTenant, {
-        name: '',
-        contact: '',
-        email: '',
-        description: '',
-        cpu: 0,
-        memory: 0,
-        status: 'active'
-      })
-      
-      showModal.value = false
-      ElMessage.success('租户创建成功')
+    // 加载租户数据
+    const loadTenants = async () => {
+      loading.value = true
+      try {
+        const response = await listTenant()
+        tenants.value = response.rows || response.data || []
+      } catch (error) {
+        console.error('加载租户数据失败:', error)
+        ElMessage.error('加载租户数据失败')
+      } finally {
+        loading.value = false
+      }
+    }
+    
+    const createTenant = async () => {
+      try {
+        await addTenant(newTenant)
+        
+        // 重置表单
+        Object.assign(newTenant, {
+          name: '',
+          contact: '',
+          email: '',
+          description: '',
+          cpu: 0,
+          memory: 0,
+          status: TENANT_STATUS.ACTIVE
+        })
+        
+        showModal.value = false
+        ElMessage.success('租户创建成功')
+        // 重新加载数据
+        await loadTenants()
+      } catch (error) {
+        console.error('创建租户失败:', error)
+        ElMessage.error('创建租户失败')
+      }
     }
     
     const editTenant = (tenant) => {
@@ -511,21 +472,16 @@ export default {
       showEditModal.value = true
     }
     
-    const updateTenant = () => {
-      const index = tenants.value.findIndex(t => t.id === editTenantForm.id)
-      if (index !== -1) {
-        tenants.value[index] = {
-          ...tenants.value[index],
-          name: editTenantForm.name,
-          contact: editTenantForm.contact,
-          email: editTenantForm.email,
-          description: editTenantForm.description,
-          cpu: editTenantForm.cpu,
-          memory: editTenantForm.memory,
-          status: editTenantForm.status
-        }
+    const updateTenant = async () => {
+      try {
+        await updateTenant(editTenantForm)
         showEditModal.value = false
         ElMessage.success('租户信息更新成功')
+        // 重新加载数据
+        await loadTenants()
+      } catch (error) {
+        console.error('更新租户失败:', error)
+        ElMessage.error('更新租户失败')
       }
     }
     
@@ -551,14 +507,15 @@ export default {
     const activateTenant = async (id) => {
       try {
         await ElMessageBox.confirm('确定要激活该租户吗？', '提示')
-        const tenant = tenants.value.find(t => t.id === id)
-        if (tenant) {
-          tenant.status = TENANT_STATUS.ACTIVE
-          addLifecycleRecord(tenant, '租户激活')
-          ElMessage.success('租户已激活')
-        }
+        await apiActivateTenant(id)
+        ElMessage.success('租户已激活')
+        // 重新加载数据
+        await loadTenants()
       } catch (error) {
-        // 用户取消操作
+        if (error !== 'cancel') {
+          console.error('激活租户失败:', error)
+          ElMessage.error('激活租户失败')
+        }
       }
     }
     
@@ -567,28 +524,30 @@ export default {
         await ElMessageBox.confirm('确定要暂停该租户吗？', '警告', {
           type: 'warning'
         })
-        const tenant = tenants.value.find(t => t.id === id)
-        if (tenant) {
-          tenant.status = TENANT_STATUS.SUSPENDED
-          addLifecycleRecord(tenant, '租户暂停')
-          ElMessage.warning('租户已暂停')
-        }
+        await apiSuspendTenant(id)
+        ElMessage.warning('租户已暂停')
+        // 重新加载数据
+        await loadTenants()
       } catch (error) {
-        // 用户取消操作
+        if (error !== 'cancel') {
+          console.error('暂停租户失败:', error)
+          ElMessage.error('暂停租户失败')
+        }
       }
     }
     
     const resumeTenant = async (id) => {
       try {
         await ElMessageBox.confirm('确定要恢复该租户吗？', '提示')
-        const tenant = tenants.value.find(t => t.id === id)
-        if (tenant) {
-          tenant.status = TENANT_STATUS.ACTIVE
-          addLifecycleRecord(tenant, '租户恢复运行')
-          ElMessage.success('租户已恢复')
-        }
+        await apiResumeTenant(id)
+        ElMessage.success('租户已恢复')
+        // 重新加载数据
+        await loadTenants()
       } catch (error) {
-        // 用户取消操作
+        if (error !== 'cancel') {
+          console.error('恢复租户失败:', error)
+          ElMessage.error('恢复租户失败')
+        }
       }
     }
     
@@ -597,14 +556,15 @@ export default {
         await ElMessageBox.confirm('确定要停用该租户吗？此操作将终止租户所有服务！', '警告', {
           type: 'warning'
         })
-        const tenant = tenants.value.find(t => t.id === id)
-        if (tenant) {
-          tenant.status = TENANT_STATUS.DISABLED
-          addLifecycleRecord(tenant, '租户停用')
-          ElMessage.warning('租户已停用')
-        }
+        await apiDisableTenant(id)
+        ElMessage.warning('租户已停用')
+        // 重新加载数据
+        await loadTenants()
       } catch (error) {
-        // 用户取消操作
+        if (error !== 'cancel') {
+          console.error('停用租户失败:', error)
+          ElMessage.error('停用租户失败')
+        }
       }
     }
     
@@ -615,27 +575,16 @@ export default {
           cancelButtonText: '取消',
           type: 'warning',
         })
-        const tenant = tenants.value.find(t => t.id === id)
-        if (tenant) {
-          tenant.status = TENANT_STATUS.DELETED
-          addLifecycleRecord(tenant, '租户删除')
-          tenants.value = tenants.value.filter(t => t.id !== id)
-          ElMessage.success('租户已删除')
-        }
+        await delTenant(id)
+        ElMessage.success('租户已删除')
+        // 重新加载数据
+        await loadTenants()
       } catch (error) {
-        // 用户取消删除
+        if (error !== 'cancel') {
+          console.error('删除租户失败:', error)
+          ElMessage.error('删除租户失败')
+        }
       }
-    }
-    
-    const addLifecycleRecord = (tenant, action) => {
-      if (!tenant.lifecycle) {
-        tenant.lifecycle = []
-      }
-      tenant.lifecycle.push({
-        time: new Date().toLocaleString(),
-        type: getStatusType(tenant.status),
-        content: action
-      })
     }
     
     
@@ -648,6 +597,11 @@ export default {
           // 取消关闭
         })
     }
+    
+    // 组件挂载时加载数据
+    onMounted(() => {
+      loadTenants()
+    })
     
     return {
       showModal,
@@ -674,7 +628,8 @@ export default {
       TENANT_STATUS,
       showDetailDialog,
       currentTenant,
-      showTenantDetail
+      showTenantDetail,
+      loading
     }
   }
 }

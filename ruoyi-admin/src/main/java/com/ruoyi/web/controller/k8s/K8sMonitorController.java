@@ -140,6 +140,83 @@ public class K8sMonitorController
         
         data.put("pods", pods);
         
+        // AI加速卡数据
+        List<Map<String, Object>> aiAccelerators = new ArrayList<>();
+        
+        Map<String, Object> accel1 = new HashMap<>();
+        accel1.put("name", "GPU-master-NVIDIA-A100");
+        accel1.put("type", "NVIDIA A100");
+        accel1.put("utilization", 75);
+        accel1.put("memoryUsed", 32 * 1024);
+        accel1.put("memoryTotal", 40 * 1024);
+        accel1.put("temperature", 72);
+        accel1.put("powerUsage", 280);
+        accel1.put("status", "Busy");
+        aiAccelerators.add(accel1);
+        
+        Map<String, Object> accel2 = new HashMap<>();
+        accel2.put("name", "GPU-worker1-NVIDIA-V100");
+        accel2.put("type", "NVIDIA V100");
+        accel2.put("utilization", 45);
+        accel2.put("memoryUsed", 12 * 1024);
+        accel2.put("memoryTotal", 32 * 1024);
+        accel2.put("temperature", 65);
+        accel2.put("powerUsage", 250);
+        accel2.put("status", "Online");
+        aiAccelerators.add(accel2);
+        
+        Map<String, Object> accel3 = new HashMap<>();
+        accel3.put("name", "GPU-worker2-NVIDIA-T4");
+        accel3.put("type", "NVIDIA T4");
+        accel3.put("utilization", 20);
+        accel3.put("memoryUsed", 4 * 1024);
+        accel3.put("memoryTotal", 16 * 1024);
+        accel3.put("temperature", 58);
+        accel3.put("powerUsage", 70);
+        accel3.put("status", "Idle");
+        aiAccelerators.add(accel3);
+        
+        data.put("aiAccelerators", aiAccelerators);
+        
+        // 网络统计数据
+        Map<String, Object> networkStats = new HashMap<>();
+        networkStats.put("totalBandwidth", 1000);
+        networkStats.put("inbound", 125 * 1024);
+        networkStats.put("outbound", 98 * 1024);
+        networkStats.put("connections", 2456);
+        
+        List<Map<String, Object>> interfaces = new ArrayList<>();
+        
+        Map<String, Object> iface1 = new HashMap<>();
+        iface1.put("name", "eth0");
+        iface1.put("ip", "192.168.152.152");
+        iface1.put("status", "up");
+        iface1.put("rxRate", 45 * 1024);
+        iface1.put("txRate", 32 * 1024);
+        iface1.put("errorRate", 0.02);
+        interfaces.add(iface1);
+        
+        Map<String, Object> iface2 = new HashMap<>();
+        iface2.put("name", "eth1");
+        iface2.put("ip", "192.168.152.118");
+        iface2.put("status", "up");
+        iface2.put("rxRate", 28 * 1024);
+        iface2.put("txRate", 22 * 1024);
+        iface2.put("errorRate", 0.01);
+        interfaces.add(iface2);
+        
+        Map<String, Object> iface3 = new HashMap<>();
+        iface3.put("name", "bond0");
+        iface3.put("ip", "192.168.152.114");
+        iface3.put("status", "up");
+        iface3.put("rxRate", 52 * 1024);
+        iface3.put("txRate", 44 * 1024);
+        iface3.put("errorRate", 0.15);
+        interfaces.add(iface3);
+        
+        networkStats.put("interfaces", interfaces);
+        data.put("networkStats", networkStats);
+        
         return AjaxResult.success(data);
     }
 }
