@@ -266,7 +266,6 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { listHosts, addHost, updateHost, delHost } from '@/api/resource_manage/host';
 
 export default {
-  name: 'HostManagement',
   setup() {
     // 状态文本映射
     const statusText = {

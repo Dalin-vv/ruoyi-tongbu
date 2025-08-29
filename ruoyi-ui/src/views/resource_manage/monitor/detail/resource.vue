@@ -117,21 +117,7 @@ export default {
       type: Array,
       default: () => []
     },
-    // 从父组件传递的AI加速卡数据
-    aiAccelerators: {
-      type: Array,
-      default: () => []
-    },
-    // 从父组件传递的网络统计数据
-    networkStats: {
-      type: Object,
-      default: () => ({})
-    },
-    // 从父组件传递的集群概览数据
-    summary: {
-      type: Object,
-      default: () => ({})
-    }
+    
   },
   
   data() {
